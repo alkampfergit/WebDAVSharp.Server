@@ -110,12 +110,8 @@ namespace WebDAVSharp.Server.MethodHandlers
             {
                 throw new WebDavUnauthorizedException();
             }
-            catch (WebDavNotFoundException wex)
-            {
-                throw new WebDavNotFoundException(String.Format("Cannot found name {0} from uri {1} father {2}", name, childUri, collection.ItemPath), wex);
-            }
             if (item == null)
-                throw new WebDavNotFoundException(String.Format("Cannot found name {0} from uri {1} father {2}", name, childUri, collection.ItemPath));
+                throw new WebDavNotFoundException();
 
             return item;
         }

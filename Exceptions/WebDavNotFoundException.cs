@@ -13,6 +13,15 @@ namespace WebDAVSharp.Server.Exceptions
         /// <summary>
         /// Initializes a new instance of the <see cref="WebDavNotFoundException" /> class.
         /// </summary>
+        public WebDavNotFoundException()
+            : base(HttpStatusCode.NotFound)
+        {
+            // Do nothing here
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebDavNotFoundException" /> class.
+        /// </summary>
         /// <param name="message">The exception message stating the reason for the exception being thrown.</param>
         /// <param name="innerException">The 
         /// <see cref="Exception" /> that is the cause for this exception;
