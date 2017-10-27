@@ -9,7 +9,7 @@ using System.Xml;
 using WebDAVSharp.Server.Adapters;
 using WebDAVSharp.Server.Stores;
 using WebDAVSharp.Server.Utilities;
-using log4net;
+
 using System.Xml.Linq;
 
 namespace WebDAVSharp.Server.MethodHandlers
@@ -101,7 +101,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             }
             catch (Exception ex)
             {
-                WebDavServer.Log.Warn(ex.Message);
+                WebDavServer.Log.Warning(ex.Message);
             }
 
             /***************************************************************************************************

@@ -82,7 +82,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             }
             catch (Exception ex)
             {
-               WebDavServer.Log.Warn(
+               WebDavServer.Log.Warning(
                    String.Format("Request unlock on a resource that does not exists: {0}", context.Request.Url), ex);
             }
 

@@ -65,8 +65,8 @@ namespace WebDAVSharp.Server.Adapters.AuthenticationTypes
             }
         }
 
-        private Boolean _canSupportKerberos;
-        private AuthenticationSchemes _supportedAuthScheme;
+        private readonly Boolean _canSupportKerberos;
+        private readonly AuthenticationSchemes _supportedAuthScheme;
 
         #endregion
 
@@ -80,20 +80,20 @@ namespace WebDAVSharp.Server.Adapters.AuthenticationTypes
             var currentIdentity = WindowsIdentity.GetCurrent();
             if (currentIdentity.Name.StartsWith("NT AUTHORITY\\"))
             {
-                WebDavServer.Log.Info("WebDav: SmartAdapter is used with Kerberos Support");
+                WebDavServer.Log.Information("WebDav: SmartAdapter is used with Kerberos Support");
                 _supportedAuthScheme = AuthenticationSchemes.Negotiate | AuthenticationSchemes.Basic;
                 _canSupportKerberos = true;
             }
             else
             {
-                WebDavServer.Log.InfoFormat(
+                WebDavServer.Log.Information(
 @"WebDav: SmartAdapter is used WITHOUT Kerberos Support because user is {0}\n
 Kerberos can be only used with Local system or Network Service. NTLM will be used.", currentIdentity.Name);
                 _supportedAuthScheme = AuthenticationSchemes.Ntlm | AuthenticationSchemes.Basic;
                 
                 _canSupportKerberos = false;
             }
-            WebDavServer.Log.DebugFormat("_canSupportKerberos is {0}", _canSupportKerberos);
+            WebDavServer.Log.Debug("_canSupportKerberos is {0}", _canSupportKerberos);
             _listener = new HttpListener
             {
                 AuthenticationSchemes = _supportedAuthScheme,
