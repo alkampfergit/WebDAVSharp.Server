@@ -211,6 +211,7 @@ namespace WebDAVSharp.Server
 		/// <see cref="IWebDavStore" /> store object that will provide
 		/// collections and documents for this 
 		/// <see cref="WebDavServer" />.</param>
+		/// <param name="serilogConfiguration"></param>
 		/// <param name="listener">The 
 		/// <see cref="IHttpListener" /> object that will handle the web server portion of
 		/// the WebDAV server; or 
@@ -229,8 +230,9 @@ namespace WebDAVSharp.Server
 		/// <para>- or -</para>
 		/// <para>
 		///   <paramref name="methodHandlers" /> contains a <c>null</c>-reference.</para></exception>
-		public WebDavServer(IWebDavStore store, IHttpListener listener = null, IEnumerable<IWebDavMethodHandler> methodHandlers = null)
+		public WebDavServer(IWebDavStore store, LoggerConfiguration serilogConfiguration, IHttpListener listener = null, IEnumerable<IWebDavMethodHandler> methodHandlers = null)
 		{
+			_log = serilogConfiguration.CreateLogger();
 			if (store == null)
 				throw new ArgumentNullException("store");
 			if (listener == null)
