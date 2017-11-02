@@ -64,7 +64,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             IWebDavStoreItem item;
             if ((item = collection.GetItemByName(collectionName)) != null)
             {
-                WebDavServer.Log.WarnFormat("MKCOL Failed: item {0} already exists as child of {1}. ",
+                WebDavServer.Log.Warning("MKCOL Failed: item {0} already exists as child of {1}. ",
                     collectionName, collection.ItemPath);
                 throw new WebDavMethodNotAllowedException();
             }

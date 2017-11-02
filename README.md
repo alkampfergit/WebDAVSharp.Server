@@ -5,6 +5,8 @@ A WebDAV server, coded in C#, which can be used for various WebDAV .NET applicat
 
 WebDAV# is developed in the .NET Framework 4.5
 
+[Release Notes](ReleaseNotes.md)
+
 ## Develop notice.
 
 This version was forked by original implementation found in [https://github.com/WebDAVSharp/WebDAVSharp.Server](https://github.com/WebDAVSharp/WebDAVSharp.Server) then modified to fix some bug and to adapt to internal usage. 
@@ -38,7 +40,6 @@ The WebDAV server implementation was based on another open source project, also 
 The maintainer of the project is [Lasse V. Karlsen][1] and the code can be found on [CodePlex][2].
 
 This version of WebDAV# has been developed by [Lieven Janssen][3] and [Ewout Merckx][4] at [Xplore+][5].
-
 
   [1]: http://www.vkarlsen.no/
   [2]: https://webdavsharp.codeplex.com/

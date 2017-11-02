@@ -27,7 +27,7 @@ This version was forked by Proximo S.r.L. and republished in MyGet with a differ
         </frameworkAssemblies>
 		
 		<dependencies>
-		  <dependency id="log4net" version="1.2.10" /> 
+		  <dependency id="Serilog" version="2.5.0" /> 
 		  <dependency id="Metrics.NET" version="0.2.16" /> 
 		</dependencies>
     </metadata>

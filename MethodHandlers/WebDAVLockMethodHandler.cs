@@ -11,7 +11,7 @@ using System.Xml;
 using WebDAVSharp.Server.Adapters;
 using WebDAVSharp.Server.Exceptions;
 using WebDAVSharp.Server.Stores;
-using log4net;
+
 using WebDAVSharp.Server.Stores.Locks;
 using WebDAVSharp.Server.Utilities;
 
@@ -119,15 +119,13 @@ namespace WebDAVSharp.Server.MethodHandlers
                 }
                 catch (Exception ex)
                 {
-                    WebDavServer.Log.Warn(ex.Message);
+                    WebDavServer.Log.Warning(ex.Message);
                     throw;
                 }
-
 
                 /***************************************************************************************************
                  * Lock the file or folder
                  ***************************************************************************************************/
-
 
                 // Get the parent collection of the item
                 IWebDavStoreCollection collection = GetParentCollection(server, store, context.Request.Url);
@@ -176,7 +174,7 @@ namespace WebDAVSharp.Server.MethodHandlers
                 }
                 catch (Exception ex)
                 {
-                    WebDavServer._log.Error(String.Format("Error occourred while acquiring lock {0}", context.Request.Url), ex);
+                    WebDavServer.Log.Error(String.Format("Error occourred while acquiring lock {0}", context.Request.Url), ex);
                     lockResult = 423; //Resource cannot be locked some exception occurred
                 }
                 #endregion
@@ -215,7 +213,7 @@ namespace WebDAVSharp.Server.MethodHandlers
                 }
                 catch (Exception ex)
                 {
-                    WebDavServer.Log.Warn(ex.Message);
+                    WebDavServer.Log.Warning(ex.Message);
                     throw;
                 }
 
@@ -268,9 +266,9 @@ namespace WebDAVSharp.Server.MethodHandlers
 
             // convert the StringBuilder
             string resp = response.InnerXml;
-            if (WebDavServer.Log.IsDebugEnabled)
+            if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
             {
-                WebDavServer.Log.DebugFormat(
+                WebDavServer.Log.Debug(
 @"Request {0}:{1}:{2}
 Request
 {3}

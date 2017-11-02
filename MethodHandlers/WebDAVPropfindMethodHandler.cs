@@ -13,7 +13,6 @@ using WebDAVSharp.Server.Exceptions;
 using WebDAVSharp.Server.Stores;
 using WebDAVSharp.Server.Stores.Locks;
 using WebDAVSharp.Server.Utilities;
-using log4net;
 
 namespace WebDAVSharp.Server.MethodHandlers
 {
@@ -152,12 +151,12 @@ namespace WebDAVSharp.Server.MethodHandlers
              ***************************************************************************************************/
             XmlDocument responseDoc = ResponseDocument(context, isPropname, response);
 
-            /***************************************************************************************************
+			/***************************************************************************************************
              * Send the response
              ***************************************************************************************************/
-            if (WebDavServer.Log.IsDebugEnabled)
-            {
-                WebDavServer.Log.DebugFormat(
+			if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
+			{
+                WebDavServer.Log.Debug(
 @"Request {0}:{1}:{2}
 Request
 {3}
@@ -258,7 +257,7 @@ Response:
             }
             catch (Exception ex)
             {
-                WebDavServer.Log.WarnFormat("XmlDocument has not been read correctly: {0}", requestBody);
+                WebDavServer.Log.Warning("XmlDocument has not been read correctly: {0}", requestBody);
                 throw new WebDavBadRequestException("Malformed XML", ex);
             }
 
