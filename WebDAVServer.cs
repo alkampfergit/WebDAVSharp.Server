@@ -16,6 +16,7 @@ using System.Xml;
 using WebDAVSharp.Server.Utilities;
 using System.Diagnostics;
 using Serilog;
+using Serilog.Core;
 
 namespace WebDAVSharp.Server
 {
@@ -37,7 +38,6 @@ namespace WebDAVSharp.Server
 		private readonly bool _ownsListener;
 		private readonly IWebDavStore _store;
 		private readonly Dictionary<string, IWebDavMethodHandler> _methodHandlers;
-		internal static Serilog.Core.Logger _log;
 
 		private readonly object _threadLock = new object();
 		private ManualResetEvent _stopEvent;
@@ -108,11 +108,11 @@ namespace WebDAVSharp.Server
 		/// <summary>
 		/// Logging Interface
 		/// </summary>
-		public static Serilog.Core.Logger Log
+		public static ILogger Log
 		{
 			get
 			{
-				return _log;
+				return Serilog.Log.Logger;
 			}
 		}
 
@@ -156,12 +156,9 @@ namespace WebDAVSharp.Server
 		/// </summary>
 		/// <param name="store"></param>
 		/// <param name="authtype"></param>
-		/// <param name="serilogConfiguration"></param>
 		/// <param name="methodHandlers"></param>
-		public WebDavServer(IWebDavStore store, AuthType authtype, LoggerConfiguration serilogConfiguration, IEnumerable<IWebDavMethodHandler> methodHandlers = null)
+		public WebDavServer(IWebDavStore store, AuthType authtype, IEnumerable<IWebDavMethodHandler> methodHandlers = null)
 		{
-			_log = serilogConfiguration.CreateLogger();
-
 			_ownsListener = true;
 			switch (authtype)
 			{
@@ -211,7 +208,6 @@ namespace WebDAVSharp.Server
 		/// <see cref="IWebDavStore" /> store object that will provide
 		/// collections and documents for this 
 		/// <see cref="WebDavServer" />.</param>
-		/// <param name="serilogConfiguration"></param>
 		/// <param name="listener">The 
 		/// <see cref="IHttpListener" /> object that will handle the web server portion of
 		/// the WebDAV server; or 
@@ -230,9 +226,8 @@ namespace WebDAVSharp.Server
 		/// <para>- or -</para>
 		/// <para>
 		///   <paramref name="methodHandlers" /> contains a <c>null</c>-reference.</para></exception>
-		public WebDavServer(IWebDavStore store, LoggerConfiguration serilogConfiguration, IHttpListener listener = null, IEnumerable<IWebDavMethodHandler> methodHandlers = null)
+		public WebDavServer(IWebDavStore store, IHttpListener listener = null, IEnumerable<IWebDavMethodHandler> methodHandlers = null)
 		{
-			_log = serilogConfiguration.CreateLogger();
 			if (store == null)
 				throw new ArgumentNullException("store");
 			if (listener == null)
@@ -348,7 +343,7 @@ namespace WebDAVSharp.Server
 		/// </summary>
 		private void BackgroundThreadMethod()
 		{
-			_log.Information("WebDAVServer background thread has started");
+			Log.Information("WebDAVServer background thread has started");
 			try
 			{
 				_listener.Start();
@@ -356,7 +351,7 @@ namespace WebDAVSharp.Server
 				sw.Start();
 				while (true)
 				{
-					_log.Debug("BackgroundThreadMethod poll ms: {0}", sw.ElapsedMilliseconds);
+					Log.Debug("BackgroundThreadMethod poll ms: {0}", sw.ElapsedMilliseconds);
 					if (_stopEvent.WaitOne(0))
 						return;
 
@@ -364,10 +359,10 @@ namespace WebDAVSharp.Server
 					IHttpListenerContext context = Listener.GetContext(_stopEvent);
 					if (context == null)
 					{
-						_log.Debug("Exiting thread");
+						Log.Debug("Exiting thread");
 						return;
 					}
-					_log.Debug("Queued Context request: {0}", context.Request.HttpMethod);
+					Log.Debug("Queued Context request: {0}", context.Request.HttpMethod);
 
 					ThreadPool.QueueUserWorkItem(ProcessRequest, context);
 				}
@@ -376,12 +371,12 @@ namespace WebDAVSharp.Server
 			{
 				//This error occours if we are not able to queue a request, the whole webdav server
 				//is terminating.
-				_log.Error(String.Format("Web dav ended unexpectedly with error {0}", ex.Message), ex);
+				Log.Error(String.Format("Web dav ended unexpectedly with error {0}", ex.Message), ex);
 			}
 			finally
 			{
 				_listener.Stop();
-				_log.Information("WebDAVServer background thread has terminated");
+				Log.Information("WebDAVServer background thread has terminated");
 			}
 		}
 
@@ -487,7 +482,7 @@ namespace WebDAVSharp.Server
 						if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
 						{
 							string message = CreateLogMessage(context, callInfo, request, response, requestHeader, xLitmusTest);
-							_log.Debug(message);
+							Log.Debug(message);
 
 						}
 					}
@@ -497,27 +492,27 @@ namespace WebDAVSharp.Server
 					}
 					catch (UnauthorizedAccessException ex)
 					{
-						_log.Information("Unauthorized: " + ex.Message);
+						Log.Information("Unauthorized: " + ex.Message);
 						throw new WebDavUnauthorizedException();
 					}
 					catch (FileNotFoundException ex)
 					{
-						_log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
+						Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
 						throw new WebDavNotFoundException("FileNotFound", innerException: ex);
 					}
 					catch (DirectoryNotFoundException ex)
 					{
-						_log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
+						Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
 						throw new WebDavNotFoundException("DirectoryNotFound", innerException: ex);
 					}
 					catch (NotImplementedException ex)
 					{
-						_log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
+						Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
 						throw new WebDavNotImplementedException(innerException: ex);
 					}
 					catch (Exception ex)
 					{
-						_log.Error("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
+						Log.Error("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
 						throw new WebDavInternalServerException(innerException: ex);
 					}
 				}
@@ -529,13 +524,13 @@ namespace WebDAVSharp.Server
 						if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
 						{
 							string message = CreateLogMessage(context, callInfo, request, response, requestHeader, xLitmusTest);
-							_log.Debug(message);
+							Log.Debug(message);
 						}
 					}
 					else
 					{
 						string message = CreateLogMessage(context, callInfo, request, response, requestHeader, xLitmusTest);
-						_log.Warning(message, ex);
+						Log.Warning(message, ex);
 					}
 
 					SendResponseForException(context, ex);
@@ -582,8 +577,8 @@ namespace WebDAVSharp.Server
 			}
 			catch (Exception innerEx)
 			{
-				_log.Error("Exception cannot be returned to caller: " + ex.Message, ex);
-				_log.Error("Unable to send response for exception: " + innerEx.Message, innerEx);
+				Log.Error("Exception cannot be returned to caller: " + ex.Message, ex);
+				Log.Error("Unable to send response for exception: " + innerEx.Message, innerEx);
 			}
 
 		}

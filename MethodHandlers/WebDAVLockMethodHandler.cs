@@ -174,7 +174,7 @@ namespace WebDAVSharp.Server.MethodHandlers
                 }
                 catch (Exception ex)
                 {
-                    WebDavServer._log.Error(String.Format("Error occourred while acquiring lock {0}", context.Request.Url), ex);
+                    WebDavServer.Log.Error(String.Format("Error occourred while acquiring lock {0}", context.Request.Url), ex);
                     lockResult = 423; //Resource cannot be locked some exception occurred
                 }
                 #endregion
