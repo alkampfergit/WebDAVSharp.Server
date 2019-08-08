@@ -28,7 +28,7 @@ This version was forked by Proximo S.r.L. and republished in MyGet with a differ
 		
 		<dependencies>
 		  <dependency id="Serilog" version="2.5.0" /> 
-		  <dependency id="Metrics.NET" version="0.2.16" /> 
+		  <dependency id="Metrics" version="0.5.4.1001" /> 
 		</dependencies>
     </metadata>
     <files>
