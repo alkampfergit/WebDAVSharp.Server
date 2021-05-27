@@ -42,7 +42,6 @@ namespace WebDAVSharp.Server.MethodHandlers
                 //new WebDavProperty("lockdiscovery")
             };
 
-
         #endregion
 
         #region Properties
@@ -149,7 +148,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             /***************************************************************************************************
              * Create the body for the response
              ***************************************************************************************************/
-            XmlDocument responseDoc = ResponseDocument(context, isPropname, response);
+            ResponseDocument(context, isPropname, response);
 
 			/***************************************************************************************************
              * Send the response
@@ -166,7 +165,6 @@ Response:
                 request.Beautify(), 
                 response.Beautify());
             }
-
 
             SendResponse(context, response);
         }
@@ -605,6 +603,5 @@ Response:
         #endregion
 
         #endregion
-
     }
 }

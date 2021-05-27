@@ -22,7 +22,6 @@ namespace WebDAVSharp.Server.MethodHandlers
     /// </summary>
     internal class WebDavLockMethodHandler : WebDavMethodHandlerBase
     {
-
         #region Properties
 
         /// <summary>
@@ -64,7 +63,6 @@ namespace WebDAVSharp.Server.MethodHandlers
           XmlDocument request,
           XmlDocument response)
         {
-
             if (!WebDavStoreItemLock.LockEnabled) throw new WebDavNotImplementedException("Lock support disabled");
             /***************************************************************************************************
              * Retreive al the information from the request
@@ -239,7 +237,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             // Add the additional elements, e.g. the header elements
 
             // The timeout element
-            WebDavProperty timeoutProperty = new WebDavProperty("timeout", timeout);// timeout);
+            WebDavProperty timeoutProperty = new WebDavProperty("timeout", timeout); // timeout);
             activelock.AppendChild(timeoutProperty.ToXmlElement(response));
 
             // The depth element
@@ -249,7 +247,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             // The locktoken element
             WebDavProperty locktokenProperty = new WebDavProperty("locktoken", string.Empty);
             XmlElement locktokenElement = locktokenProperty.ToXmlElement(response);
-            WebDavProperty hrefProperty = new WebDavProperty("href", locktoken);//"opaquelocktoken:e71d4fae-5dec-22df-fea5-00a0c93bd5eb1");
+            WebDavProperty hrefProperty = new WebDavProperty("href", locktoken); //"opaquelocktoken:e71d4fae-5dec-22df-fea5-00a0c93bd5eb1");
             locktokenElement.AppendChild(hrefProperty.ToXmlElement(response));
             activelock.AppendChild(locktokenElement);
 
@@ -279,9 +277,7 @@ Response:
                 response.Beautify());
             }
 
-
             byte[] responseBytes = Encoding.UTF8.GetBytes(resp);
-
 
             context.Response.StatusCode = lockResult;
             context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription(lockResult);

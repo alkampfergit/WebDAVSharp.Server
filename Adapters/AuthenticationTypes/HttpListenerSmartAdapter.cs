@@ -28,7 +28,7 @@ namespace WebDAVSharp.Server.Adapters.AuthenticationTypes
     /// <see cref="IHttpListener" /> implementation wraps around a
     /// <see cref="HttpListener" /> instance.
     /// </summary>
-    internal sealed class HttpListenerSmartAdapter : WebDavDisposableBase, IHttpListener, IAdapter<HttpListener>
+    internal sealed class HttpListenerSmartAdapter : WebDavDisposableBase, IHttpListener
     {
         #region Private Variables
 
@@ -90,7 +90,6 @@ namespace WebDAVSharp.Server.Adapters.AuthenticationTypes
 @"WebDav: SmartAdapter is used WITHOUT Kerberos Support because user is {0}\n
 Kerberos can be only used with Local system or Network Service. NTLM will be used.", currentIdentity.Name);
                 _supportedAuthScheme = AuthenticationSchemes.Ntlm | AuthenticationSchemes.Basic;
-                
                 _canSupportKerberos = false;
             }
             WebDavServer.Log.Debug("_canSupportKerberos is {0}", _canSupportKerberos);
@@ -106,9 +105,6 @@ Kerberos can be only used with Local system or Network Service. NTLM will be use
             // sequence of files.
             //***********************************************************************************
             _listener.UnsafeConnectionNtlmAuthentication = true;
-
-
-
             _listener.AuthenticationSchemeSelectorDelegate = new AuthenticationSchemeSelector(AuthSchemeSelector);
         }
 
@@ -120,6 +116,7 @@ Kerberos can be only used with Local system or Network Service. NTLM will be use
         #endregion
 
         #region Function Overrides
+
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources
         /// </summary>
@@ -127,7 +124,9 @@ Kerberos can be only used with Local system or Network Service. NTLM will be use
         protected override void Dispose(bool disposing)
         {
             if (_listener.IsListening)
+            {
                 _listener.Close();
+            }
         }
 
         #endregion
@@ -154,11 +153,17 @@ Kerberos can be only used with Local system or Network Service. NTLM will be use
         public IHttpListenerContext GetContext(EventWaitHandle abortEvent)
         {
             if (abortEvent == null)
-                throw new ArgumentNullException("abortEvent");
+            {
+                throw new ArgumentNullException(nameof(abortEvent));
+            }
 
             IAsyncResult ar = _listener.BeginGetContext(null, null);
             int index = WaitHandle.WaitAny(new[] { abortEvent, ar.AsyncWaitHandle });
-            if (index != 1) return null;
+            if (index != 1)
+            {
+                return null;
+            }
+
             HttpListenerContext context = _listener.EndGetContext(ar);
             return new HttpListenerContextAdapter(context);
         }
@@ -181,7 +186,6 @@ Kerberos can be only used with Local system or Network Service. NTLM will be use
 
         public IIdentity GetIdentity(IHttpListenerContext context)
         {
-
             try
             {
                 if (context.AdaptedInstance.User.Identity == null ||
@@ -216,7 +220,7 @@ Kerberos can be only used with Local system or Network Service. NTLM will be use
                         {
                             //login failed
                         }
-                       
+
                     }
                     return null;
                 }
@@ -229,7 +233,6 @@ Kerberos can be only used with Local system or Network Service. NTLM will be use
             {
                 return null;
             }
-
         }
 
         #endregion

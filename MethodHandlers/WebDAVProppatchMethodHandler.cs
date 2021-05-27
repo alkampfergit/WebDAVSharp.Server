@@ -19,7 +19,6 @@ namespace WebDAVSharp.Server.MethodHandlers
     /// </summary>
     internal class WebDavProppatchMethodHandler : WebDavMethodHandlerBase
     {
-
         #region Properties
         /// <summary>
         /// Gets the collection of the names of the HTTP methods handled by this instance.
@@ -204,6 +203,5 @@ namespace WebDAVSharp.Server.MethodHandlers
         }
 
         #endregion
-
     }
 }

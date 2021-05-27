@@ -87,7 +87,6 @@ namespace WebDAVSharp.Server.Stores.DiskStore
                         }
                     }
 
-
                     foreach (string filePath in (Directory.GetFiles(ItemPath).Where(fileName => CanReadFile(Path.Combine(ItemPath, fileName)))))
                     {
                         string name = Path.GetFileName(filePath);
@@ -439,7 +438,7 @@ namespace WebDAVSharp.Server.Stores.DiskStore
             WebDavDiskStoreItem sourceItem = (WebDavDiskStoreItem)source;
             string sourceItemPath = sourceItem.ItemPath;
 
-            if (sourceItemPath.Equals(string.Empty))
+            if (String.IsNullOrEmpty(sourceItemPath))
             {
                 throw new Exception("Path to the source item not defined.");
             }

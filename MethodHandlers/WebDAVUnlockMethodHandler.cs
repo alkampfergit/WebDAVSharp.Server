@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
 using System.Xml;
 using WebDAVSharp.Server.Adapters;
@@ -18,7 +15,6 @@ namespace WebDAVSharp.Server.MethodHandlers
     /// </summary>
     internal class WebDavUnlockMethodHandler : WebDavMethodHandlerBase
     {
-
         #region Properties
 
         /// <summary>
@@ -58,7 +54,10 @@ namespace WebDAVSharp.Server.MethodHandlers
            XmlDocument request,
            XmlDocument response)
         {
-            if (!WebDavStoreItemLock.LockEnabled) throw new WebDavNotImplementedException("Lock support disabled");
+            if (!WebDavStoreItemLock.LockEnabled)
+            {
+                throw new WebDavNotImplementedException("Lock support disabled");
+            }
 
             /***************************************************************************************************
             * Send the response
@@ -82,14 +81,13 @@ namespace WebDAVSharp.Server.MethodHandlers
             }
             catch (Exception ex)
             {
-               WebDavServer.Log.Warning(
-                   String.Format("Request unlock on a resource that does not exists: {0}", context.Request.Url), ex);
+                WebDavServer.Log.Warning(
+                    String.Format("Request unlock on a resource that does not exists: {0}", context.Request.Url), ex);
             }
 
             context.SendSimpleResponse(unlockResult);
         }
 
         #endregion
-
     }
 }

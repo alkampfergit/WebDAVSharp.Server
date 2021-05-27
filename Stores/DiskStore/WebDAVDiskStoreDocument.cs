@@ -22,7 +22,7 @@ namespace WebDAVSharp.Server.Stores.DiskStore
         /// <param name="parentCollection">The parent 
         /// <see cref="WebDavDiskStoreCollection" /> that contains this 
         /// <see cref="WebDavDiskStoreItem" />;
-        /// or 
+        /// or
         /// <c>null</c> if this is the root 
         /// <see cref="WebDavDiskStoreCollection" />.</param>
         /// <param name="path">The path that this <see cref="WebDavDiskStoreItem" /> maps to.</param>
@@ -130,7 +130,7 @@ namespace WebDAVSharp.Server.Stores.DiskStore
         }
 
         /// <summary>
-        /// 
+        /// FinishWriteOperation
         /// </summary>
         public void FinishWriteOperation()
         {

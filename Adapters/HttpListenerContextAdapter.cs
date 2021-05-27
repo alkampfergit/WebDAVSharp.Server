@@ -9,7 +9,7 @@ namespace WebDAVSharp.Server.Adapters
     /// <see cref="IHttpListenerContext" /> implementation wraps around a
     /// <see cref="HttpListenerContext" /> instance.
     /// </summary>
-    public sealed class HttpListenerContextAdapter : IHttpListenerContext, IAdapter<HttpListenerContext>
+    public sealed class HttpListenerContextAdapter : IHttpListenerContext
     {
         #region Private Variables
 
@@ -17,6 +17,7 @@ namespace WebDAVSharp.Server.Adapters
         private readonly HttpListenerRequestAdapter _request;
         private readonly HttpListenerResponseAdapter _response;
         private readonly Dictionary<String, Object> _contextData;
+
         #endregion
 
         #region Public Functions
@@ -79,7 +80,7 @@ namespace WebDAVSharp.Server.Adapters
         }
 
         /// <summary>
-        /// 
+        /// Get context data
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
@@ -93,7 +94,7 @@ namespace WebDAVSharp.Server.Adapters
         }
 
         /// <summary>
-        /// 
+        /// Set context data
         /// </summary>
         /// <param name="key"></param>
         /// <param name="data"></param>

@@ -15,7 +15,6 @@ namespace WebDAVSharp.Server.MethodHandlers
     /// </summary>
     internal sealed class WebDavGetMethodHandler : WebDavMethodHandlerBase
     {
-
         #region Properties
 
         /// <summary>
@@ -56,18 +55,20 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <exception cref="WebDavConflictException"><paramref name="context" /> specifies a request for a store item using a collection path that does not exist.</exception>
         /// <param name="response"></param>
         /// <param name="request"></param>
-       protected override void OnProcessRequest(
-           WebDavServer server,
-           IHttpListenerContext context,
-           IWebDavStore store,
-           XmlDocument request,
-           XmlDocument response)
-        { 
+        protected override void OnProcessRequest(
+            WebDavServer server,
+            IHttpListenerContext context,
+            IWebDavStore store,
+            XmlDocument request,
+            XmlDocument response)
+        {
             IWebDavStoreCollection collection = GetParentCollection(server, store, context.Request.Url);
             IWebDavStoreItem item = GetItemFromCollection(collection, context.Request.Url);
             IWebDavStoreDocument doc = item as IWebDavStoreDocument;
             if (doc == null)
+            {
                 throw new WebDavNotFoundException(string.Format("Cannot find document item  {0}", context.Request.Url));
+            }
 
             context.Response.SetEtag(doc.Etag);
             context.Response.SetLastModified(doc.ModificationDate);
@@ -86,7 +87,6 @@ namespace WebDAVSharp.Server.MethodHandlers
             context.Response.AppendHeader("MS-Author-Via", "DAV");
             context.Response.AppendHeader("Access-Control-Max-Age", "2147483647");
             context.Response.AppendHeader("Public", "");
-
 
             var ifModifiedSince = context.Request.Headers["If-Modified-Since"];
             var ifNoneMatch = context.Request.Headers["If-None-Match"];
@@ -119,12 +119,17 @@ namespace WebDAVSharp.Server.MethodHandlers
                     context.Response.StatusCode = (int)HttpStatusCode.OK;
 
                     if (docSize > 0)
+                    {
                         context.Response.ContentLength64 = docSize;
+                    }
 
                     byte[] buffer = new byte[4096];
                     int inBuffer;
                     while ((inBuffer = stream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
                         context.Response.OutputStream.Write(buffer, 0, inBuffer);
+                    }
+
                     context.Response.OutputStream.Flush();
                 }
             }
