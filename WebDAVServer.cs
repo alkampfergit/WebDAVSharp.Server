@@ -453,108 +453,106 @@ namespace WebDAVSharp.Server
             IHttpListenerContext context = (IHttpListenerContext)state;
             XmlDocument request = null;
             XmlDocument response = null;
-            using (WebDavMetrics.GetMetricCallContext(context.Request.HttpMethod.ToString()))
+
+            String xLitmusTest = "";
+            var xLitmus = context.Request.Headers["X-litmus"];
+            if (xLitmus != null)
             {
-                String xLitmusTest = "";
-                var xLitmus = context.Request.Headers["X-litmus"];
-                if (xLitmus != null)
+                xLitmusTest = String.Format("X-LITMUS[{0}]: ", xLitmus);
+            }
+            OnProcessRequestStarted(context);
+            Thread.SetData(Thread.GetNamedDataSlot(HttpUser), Listener.GetIdentity(context));
+
+            String callInfo = String.Format("{0} : {1} : {2}", context.Request.HttpMethod, context.Request.RemoteEndPoint, context.Request.Url);
+
+            Serilog.Context.LogContext.PushProperty("webdav-request", callInfo);
+
+            StringBuilder requestHeader = new StringBuilder();
+            if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
+            {
+                foreach (String header in context.Request.Headers)
                 {
-                    xLitmusTest = String.Format("X-LITMUS[{0}]: ", xLitmus);
+                    requestHeader.AppendFormat("{0}: {1}\r\n", header, context.Request.Headers[header]);
                 }
-                OnProcessRequestStarted(context);
-                Thread.SetData(Thread.GetNamedDataSlot(HttpUser), Listener.GetIdentity(context));
+            }
 
-                String callInfo = String.Format("{0} : {1} : {2}", context.Request.HttpMethod, context.Request.RemoteEndPoint, context.Request.Url);
-
-                Serilog.Context.LogContext.PushProperty("webdav-request", callInfo);
-
-                StringBuilder requestHeader = new StringBuilder();
-                if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
-                {
-                    foreach (String header in context.Request.Headers)
-                    {
-                        requestHeader.AppendFormat("{0}: {1}\r\n", header, context.Request.Headers[header]);
-                    }
-                }
-
+            try
+            {
                 try
                 {
-                    try
+                    string method = context.Request.HttpMethod;
+                    IWebDavMethodHandler methodHandler;
+                    if (!_methodHandlers.TryGetValue(method, out methodHandler))
                     {
-                        string method = context.Request.HttpMethod;
-                        IWebDavMethodHandler methodHandler;
-                        if (!_methodHandlers.TryGetValue(method, out methodHandler))
-                        {
-                            throw new WebDavMethodNotAllowedException(string.Format(CultureInfo.InvariantCulture, "%s ({0})", context.Request.HttpMethod));
-                        }
-
-                        context.Response.AppendHeader("DAV", _davHader);
-                        if (!OnValidateUser(context))
-                        {
-                            throw new WebDavUnauthorizedException();
-                        }
-                        methodHandler.ProcessRequest(this, context, Store, out request, out response);
-
-                        if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
-                        {
-                            string message = CreateLogMessage(context, callInfo, request, response, requestHeader, xLitmusTest);
-                            Log.Debug(message);
-                        }
+                        throw new WebDavMethodNotAllowedException(string.Format(CultureInfo.InvariantCulture, "%s ({0})", context.Request.HttpMethod));
                     }
-                    catch (WebDavException)
+
+                    context.Response.AppendHeader("DAV", _davHader);
+                    if (!OnValidateUser(context))
                     {
-                        throw;
-                    }
-                    catch (UnauthorizedAccessException ex)
-                    {
-                        Log.Information("Unauthorized: " + ex.Message);
                         throw new WebDavUnauthorizedException();
                     }
-                    catch (FileNotFoundException ex)
-                    {
-                        Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
-                        throw new WebDavNotFoundException("FileNotFound", innerException: ex);
-                    }
-                    catch (DirectoryNotFoundException ex)
-                    {
-                        Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
-                        throw new WebDavNotFoundException("DirectoryNotFound", innerException: ex);
-                    }
-                    catch (NotImplementedException ex)
-                    {
-                        Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
-                        throw new WebDavNotImplementedException(innerException: ex);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
-                        throw new WebDavInternalServerException(innerException: ex);
-                    }
-                }
-                catch (WebDavException ex)
-                {
-                    if (ex is WebDavNotFoundException)
-                    {
-                        //not found exception is quite common, Windows explorer often ask for files that are not there 
-                        if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
-                        {
-                            string message = CreateLogMessage(context, callInfo, request, response, requestHeader, xLitmusTest);
-                            Log.Debug(message);
-                        }
-                    }
-                    else
+                    methodHandler.ProcessRequest(this, context, Store, out request, out response);
+
+                    if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
                     {
                         string message = CreateLogMessage(context, callInfo, request, response, requestHeader, xLitmusTest);
-                        Log.Warning(message, ex);
+                        Log.Debug(message);
                     }
-
-                    SendResponseForException(context, ex);
                 }
-                finally
+                catch (WebDavException)
                 {
-                    Serilog.Context.LogContext.PushProperty("webdav-request", null);
-                    OnProcessRequestCompleted(context, callInfo, request, response, requestHeader);
+                    throw;
                 }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Log.Information("Unauthorized: " + ex.Message);
+                    throw new WebDavUnauthorizedException();
+                }
+                catch (FileNotFoundException ex)
+                {
+                    Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
+                    throw new WebDavNotFoundException("FileNotFound", innerException: ex);
+                }
+                catch (DirectoryNotFoundException ex)
+                {
+                    Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
+                    throw new WebDavNotFoundException("DirectoryNotFound", innerException: ex);
+                }
+                catch (NotImplementedException ex)
+                {
+                    Log.Warning("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
+                    throw new WebDavNotImplementedException(innerException: ex);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("(FAILED) WEB-DAV-CALL-ENDED:" + callInfo + ": " + ex.Message, ex);
+                    throw new WebDavInternalServerException(innerException: ex);
+                }
+            }
+            catch (WebDavException ex)
+            {
+                if (ex is WebDavNotFoundException)
+                {
+                    //not found exception is quite common, Windows explorer often ask for files that are not there 
+                    if (WebDavServer.Log.IsEnabled(Serilog.Events.LogEventLevel.Debug))
+                    {
+                        string message = CreateLogMessage(context, callInfo, request, response, requestHeader, xLitmusTest);
+                        Log.Debug(message);
+                    }
+                }
+                else
+                {
+                    string message = CreateLogMessage(context, callInfo, request, response, requestHeader, xLitmusTest);
+                    Log.Warning(message, ex);
+                }
+
+                SendResponseForException(context, ex);
+            }
+            finally
+            {
+                Serilog.Context.LogContext.PushProperty("webdav-request", null);
+                OnProcessRequestCompleted(context, callInfo, request, response, requestHeader);
             }
         }
 
